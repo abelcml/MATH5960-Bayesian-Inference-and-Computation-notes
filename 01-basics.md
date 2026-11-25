@@ -1,16 +1,4 @@
-# Week 1 — Bayesian basics
-
-## 1. 一句話
-
-**資料用 likelihood，信念用 prior，更新後得到 posterior；最後用 posterior 做 inference / prediction。**
-
-$$
-\boxed{\pi(\theta\mid x)\propto L(x\mid\theta)\pi(\theta)}
-$$
-
-完整式：$\pi(\theta\mid x)=L(x\mid\theta)\pi(\theta)/\int L(x\mid u)\pi(u)\,du$。
-
-## 2. 常用 distribution：看 kernel 認分布
+## 1. Usual distributions
 
 | Kernel（忽略與參數無關的常數） | 分布 |
 | --- | --- |
@@ -22,7 +10,29 @@ $$
 
 約定：Normal 寫 **mean, variance**；Gamma 寫 **shape, rate**。
 
-## 3. Credible interval
+---
+
+## 2. Bayesian updating
+
+**資料用 likelihood，信念用 prior，更新後得到 posterior；最後用 posterior 做 inference / prediction。**
+
+$$
+\boxed{\pi(\theta\mid x)\propto L(x\mid\theta)\pi(\theta)}
+$$
+
+完整式：$\pi(\theta\mid x)=L(x\mid\theta)\pi(\theta)/\int L(x\mid u)\pi(u)\,du$。
+
+### Posterior predictive sampling
+
+$$
+\boxed{p(y\mid x)=\int f(y\mid\theta)\pi(\theta\mid x)\,d\theta}
+$$
+
+如果已經有 posterior samples：先抽 $\theta$，再抽 $y\mid\theta$。**先抽參數，再抽新資料**，即把 parameter uncertainty 一起帶入預測。
+
+---
+
+## 3. Credible intervals
 
 想找 posterior 裡包含 $\theta$ 的 95% 機率區間。
 
@@ -35,14 +45,6 @@ $$
 
 這是 **給定資料後，參數的 posterior probability**，不是 frequentist confidence interval 的解釋。
 
-## 4. Posterior predictive（預測新資料 $y$）
-
-$$
-\boxed{p(y\mid x)=\int f(y\mid\theta)\pi(\theta\mid x)\,d\theta}
-$$
-
-如果已經有 posterior samples：先抽 $\theta$，再抽 $y\mid\theta$。**先抽參數，再抽新資料**，即把 parameter uncertainty 一起帶入預測。
-
-## 考試要會
+**考試要會**
 
 寫出 Bayes formula、從 kernel 認出 distribution、解釋 credible interval、寫 posterior predictive 的兩段抽樣。
