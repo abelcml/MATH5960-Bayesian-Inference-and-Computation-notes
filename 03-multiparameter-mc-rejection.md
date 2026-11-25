@@ -1,5 +1,3 @@
-# 03 Mixture Priors, Multi-parameter Inference, Monte Carlo, Rejection Sampling
-
 ## Part 1 Mixture priors, prior predictive checking
 
 ### 1.1 Mixture priors
@@ -10,7 +8,7 @@ $$
 \pi(\theta)=w_1\pi_1(\theta)+w_2\pi_2(\theta)
 $$
 
-其中 $w_1+w_2=1$。
+其中 $w_1,w_2\ge0$ 且 $w_1+w_2=1$。
 
 例如：
 
@@ -26,7 +24,7 @@ $$
 p(x)=\int f(x\mid\theta)\,\pi(\theta)\,d\theta
 $$
 
-做法：從 prior 抽 $\theta$，再從 likelihood 抽 $x$，看模擬出來的資料合不合理。不合理就代表 prior 要調整。
+做法：從 prior 抽 $\theta$，再從 likelihood 抽 $x$，看模擬出來的資料合不合理。不合理時，要回頭檢查 prior 和 likelihood 的設定。
 
 ---
 
@@ -38,7 +36,7 @@ Unknown quantity from scalar to vector：$\boldsymbol{\theta}=(\theta_1,\theta_2
 
 ### 2.2 變的地方
 
-1. Prior、posterior 都變成 **joint distribution** $\pi(\theta_1,\theta_2\mid x)$，是一個 2D surface/density：
+1. Prior 是 $\pi(\theta_1,\theta_2)$，posterior 是 $\pi(\theta_1,\theta_2\mid x)$。兩個 continuous parameters 時，可以畫成 density surface：
    - x-axis = $\theta_1$
    - y-axis = $\theta_2$
    - height = posterior density
@@ -47,10 +45,12 @@ Unknown quantity from scalar to vector：$\boldsymbol{\theta}=(\theta_1,\theta_2
 
 ### 2.3 步驟（以 Normal 為例）
 
-1. 選 prior（Jeffreys），寫 joint prior，例如 $\pi(\mu,\sigma^2)\propto 1/\sigma^2$
+1. 選 reference prior（也常稱 independence Jeffreys prior）$\pi(\mu,\sigma^2)\propto1/\sigma^2$，density 是相對於 $d\mu\,d\sigma^2$
 2. 乘 likelihood，算 posterior
 3. Algebraic trick：$\sum_i(y_i-\mu)^2=(n-1)s^2+n(\bar y-\mu)^2$
 4. Integrate out 不要的參數
+
+注意：直接對 $(\mu,\sigma^2)$ 用 joint Jeffreys rule，會得到 $(\sigma^2)^{-3/2}$。以下結果全部使用上面的 $1/\sigma^2$ prior，假設 $n\ge2$ 且 $s^2>0$。
 
 ### 2.4 Conclusion
 
@@ -67,7 +67,7 @@ $$
 
 高維 joint posterior 的 sampling 很難。舉例 Normal：
 
-Recall $p(a,b)=p(a)\cdot p(b\mid a)$，令 $a=\sigma^2\mid y$，$b=\mu$，hence
+Recall $p(a,b\mid y)=p(a\mid y)p(b\mid a,y)$，令 $a=\sigma^2$、$b=\mu$，hence
 
 $$
 p(\mu,\sigma^2\mid y)=p(\sigma^2\mid y)\cdot p(\mu\mid\sigma^2,y)
@@ -75,12 +75,12 @@ $$
 
 可以先抽 $\sigma^2$ 的 marginal posterior，再抽 $\mu$ 的 conditional posterior。
 
-- 如果 joint posterior 可以 factorize 成 marginal × conditional，就可以 sequentially sample。
+- Joint posterior 可寫成 marginal × conditional；兩個分布都能抽樣時，就可以 sequentially sample。
 - 因為前面已經知道 $\sigma^2\mid y\sim\text{InvGamma}$ / Inv-$\chi^2$，而 $\mu\mid\sigma^2,y\sim N(\bar y,\sigma^2/n)$。
 
 ### 2.6 Proper conjugate prior
 
-Recall Jeffreys 客觀、不放資訊，但積分會發散。
+前面使用的 reference prior 是 improper；它仍然代表一種 prior 選擇。
 
 有時候你希望 prior 本身是真正的機率分布。例如：
 
@@ -121,14 +121,17 @@ LLN 條件：
 
 - 抽樣分布正確
 - 抽樣 i.i.d.
-- $g$ 有有限期望
+- $E_p[|h(X)|]<\infty$
 
 ### 3.1 幾種題型
 
 - $[0,1]$ 積分最簡單
 - $a$ 到 $b$ 可壓縮到 $[0,1]$
 - $0$ 到 $k$ 則設 $u=x/k$
-- $0$ to $\infty$ 則設 $u=1/(1+x)$，then 積分變成 1 to 0
+- $0$ to $\infty$ 可設 $u=1/(1+x)$，記得 Jacobian：$x=1/u-1$、$dx=-du/u^2$，所以
+  $$
+  \int_0^\infty h(x)\,dx=\int_0^1h(1/u-1)\frac{1}{u^2}\,du
+  $$
 
 ### 3.2 Multidimensional integral
 
@@ -136,7 +139,7 @@ $$
 \int_0^1\int_0^1 g(u_1,u_2)\,du_1\,du_2
 $$
 
-照樣可以用 $\frac1N\sum g(U_{1i},U_{2i})$ 來近似這個積分。
+抽 i.i.d. $U_i=(U_{1i},U_{2i})\sim U([0,1]^2)$，用 $\frac1N\sum_{i=1}^N g(U_{1i},U_{2i})$ 近似這個積分。
 
 ### 3.3 Monte Carlo 對 Bayesian computation 的意義
 
@@ -160,7 +163,7 @@ Problem is $F$ or $F^{-1}$ may be hard to calculate.
 
 ### 4.2 How rejection sampling works
 
-Condition：only need target $f(x)$ up to proportionality, no need normalised.
+Condition：$f(x)\ge0$ 且 $0<\int f(x)\,dx<\infty$。只需知道 target up to proportionality。
 
 Step:
 
@@ -199,7 +202,7 @@ Normalising constant unknown is fine, as long as we can find above envelope.
 Hard to sample target directly, but can calculate $f(x)$ and find easy proposal $g(x)$ with finite $K$ → rejection sampling is one option.
 
 - Normalising constant can be known or unknown, both fine
-- Not the only method, no need to wait until MCMC fails
+- 可與 inverse sampling、importance sampling、MCMC 比較成本
 - Efficiency depends on how tight envelope is
 
 Let $p(x)=f(x)/Z$，$Z=\int f(x)\,dx$：
@@ -208,7 +211,7 @@ $$
 \text{acceptance rate}=Z/K
 $$
 
-Envelope too loose → reject many candidates → waste samples。所以 $K=\max_x f(x)/g(x)$。
+Envelope too loose → reject many candidates → waste samples。要選有限的 $K\ge\sup_{x:g(x)>0}f(x)/g(x)$，並確保 $g>0$ 涵蓋 $f>0$ 的區域。越接近這個上界越有效率；不一定能找到實際的 maximum。
 
 ### 4.6 Relation to Monte Carlo integration
 

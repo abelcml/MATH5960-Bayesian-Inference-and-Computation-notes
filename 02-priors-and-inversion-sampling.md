@@ -1,5 +1,3 @@
-# 02 Priors and Inversion Sampling
-
 ## Part 1 Topic of priors
 
 ### 1.1 Conjugate prior
@@ -10,16 +8,16 @@ Ex.
 
 1. Binomial likelihood, choose $\text{Beta}(a,b)$ to be prior
 2. $\text{Gamma}(a,b)$ for Poisson
-3. Gamma for Gamma
-4. Normal prior $N(b,d^2)$ for Normal likelihood
+3. Gamma prior for Gamma likelihood 的 rate parameter（shape 已知）
+4. Normal prior $N(b,d^2)$ for Normal mean（variance $\sigma^2$ 已知）
 
-When data comes from exponential family:
+當 likelihood 的 support 不依賴 $\theta$，且有以下 exponential-family form：
 
 $$
 f(x\mid\theta)=h(x)\,g(\theta)\exp\{t(x)\,c(\theta)\}
 $$
 
-then the conjugate prior is easy to be found:
+可選 conjugate prior（hyperparameters 需讓 prior 可積分）：
 
 $$
 \pi(\theta)\propto g(\theta)^{d}\exp\{b\,c(\theta)\}
@@ -52,13 +50,14 @@ $$
 \pi(\theta)\propto\sqrt{I(\theta)},\qquad I(\theta)=-E\left[\frac{\partial^2\log f(x\mid\theta)}{\partial\theta^2}\right]
 $$
 
-Invariant under reparameterisation，所以不管用哪種參數化，結果都一致。
+在 regularity conditions 下，上式用 expected Fisher information。Vector parameter 則用 $\pi(\boldsymbol\theta)\propto\sqrt{\det I(\boldsymbol\theta)}$。
+
+Invariant under smooth one-to-one reparameterisation：換參數後依照 Jacobian 轉換，得到同一個 prior probability measure。Jeffreys prior 可能 proper，也可能 improper。
 
 ---
-
 ## Part 2 Inversion sampling with MC method
 
-If $X$ has cdf $F$, then $U=F(X)\sim U(0,1)$.
+若 $F$ continuous，則 $U=F(X)\sim U(0,1)$；下面先用 strictly increasing 的 $F$ 推導。
 
 $$
 \Pr(U\le u)=\Pr(X\le F^{-1}(u))=F(F^{-1}(u))=u
@@ -66,5 +65,7 @@ $$
 
 所以反過來：draw $u\sim U(0,1)$，set $x=F^{-1}(u)$，則 $x\sim F$。
 
-- 優點：independent samples
+Discrete distribution 也能 inverse sample，使用 generalized inverse $F^{-1}(u)=\inf\{x:F(x)\ge u\}$。但 discrete $X$ 的 $F(X)$ 通常不會是 uniform。
+
+- 優點：用 independent uniforms 可產生 independent samples
 - 缺點：需要 $F^{-1}$ 算得出來；基本上只適用 univariate
