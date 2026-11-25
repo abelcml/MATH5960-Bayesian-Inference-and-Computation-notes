@@ -1,208 +1,94 @@
-## Part 1 Loss functions / Bayesian decisions
+# Week 4 — Decisions, asymptotics, MC error & IS
 
-選 decision $d$ 使 expected posterior loss $E_\pi[L(\theta,d)]=\int L(\theta,d)\,\pi(\theta\mid x)\,d\theta$ 最小。
+## 1. Bayesian decision：用 posterior 選行動
 
-| Loss | $L(\theta,d)$ | 最佳 decision $d$ |
-| --- | --- | --- |
-| Quadratic | $(\theta-d)^2$ | posterior mean |
-| Linear | $k_1(\theta-d)$ if $d<\theta$；$k_2(d-\theta)$ if $d>\theta$ | posterior quantile $q=\frac{k_1}{k_1+k_2}$ |
-| Absolute error | $\lvert\theta-d\rvert$ | posterior median |
-| 0-1（discrete parameter） | $\mathbf1\{\theta\ne d\}$ | posterior mode |
-
-- For quadratic loss, the minimum expected loss is the posterior variance：
-$$
-E_\pi[(\theta-d)^2]=\text{Var}(\theta\mid x)+\big(E(\theta\mid x)-d\big)^2
-$$
-- For linear loss, the minimum when takes decision $d$ as quantile $q$.
-- Absolute error loss $L(\theta,d)=\lvert\theta-d\rvert$ is a simplified version of linear loss ($k_1=k_2$). Min happens when we pick $d$ as median.
-- Discrete 0-1 loss：pick mode（posterior probability 最大的點）。Continuous posterior 下，exact 0-1 loss 對每個 $d$ 的 expected loss 都是 1；若改用 $L_\varepsilon(\theta,d)=\mathbf1\{|\theta-d|>\varepsilon\}$，小 $\varepsilon$ 下才會在適當條件下連到 density mode。
-
----
-
-## Part 2 Posterior asymptotics
-
-### 1. 樣本變多，posterior 會怎樣？
-
-資料越多，對 $\theta$ 的不確定性通常越小。在 regular model 下，posterior 會集中到真實參數 $\theta_0$ 附近，而且局部形狀越來越接近 normal：
+**原則：選 decision $d$，讓 posterior expected loss 最小。**
 
 $$
-\theta\mid x\approx N\left(\hat\theta,\;\frac{1}{nI(\theta_0)}\right)
+\boxed{d^*=\arg\min_d E_{\pi(\theta\mid x)}[L(\theta,d)]}
 $$
 
-這裡 $\hat\theta$ 是 MLE，$I(\theta_0)$ 是 **一筆 observation 的 Fisher information**。先看懂兩件事：
+| Loss | 最佳 decision |
+| --- | --- |
+| Squared error $(\theta-d)^2$ | Posterior **mean** |
+| Absolute error $|\theta-d|$ | Posterior **median** |
+| Asymmetric linear：低估成本 $k_1$、高估成本 $k_2$ | Posterior quantile $k_1/(k_1+k_2)$ |
+| 0–1 loss（離散 $\theta$） | Posterior **mode** |
 
-- **位置**：posterior 的中心約在 $\hat\theta$，而 $\hat\theta\to\theta_0$。
-- **寬度**：normal approximation 的 variance 是 $1/[nI(\theta_0)]$，standard deviation 以 $1/\sqrt n$ 的速度縮小。
+Continuous $\theta$ 的 exact 0–1 loss 不適合直接用來推 mode；這個結果限定離散狀況。
 
-以下考慮 scalar parameter、i.i.d. data 和 correctly specified model。這個結果需要 regularity conditions，例如 model identifiable、$\theta_0$ 在參數空間內部、log-likelihood 足夠平滑、$0<I(\theta_0)<\infty$，且固定的 prior 在 $\theta_0$ 附近連續且正值。下面是推導直覺。
+## 2. Posterior asymptotics
 
----
-
-### 2. 從 posterior 開始，在 MLE 附近做 Taylor
-
-保留原本的記號，$\ell_n(\theta)$ 是 **平均** log-likelihood：
-
-$$
-\ell_n(\theta)=\frac1n\sum_{i=1}^n\log f(x_i\mid\theta),
-\qquad
-\pi(\theta\mid x)\propto\pi(\theta)\exp\big(n\ell_n(\theta)\big)
-$$
-
-MLE $\hat\theta$ 是 log-likelihood 的最大值點。若它在內部，則 $\ell_n'(\hat\theta)=0$，所以 Taylor 展開的一階項消失：
+**一句話：資料多時，在 regularity conditions 下 posterior 接近 Normal，且越來越窄。**
 
 $$
-\ell_n(\theta)\approx\ell_n(\hat\theta)
-+\frac12\ell_n''(\hat\theta)(\theta-\hat\theta)^2
+\boxed{\theta\mid x\approx N\left(\hat\theta,\frac1{nI(\theta_0)}\right)}
 $$
 
-定義 **整份資料的 observed information**：
+- $\hat\theta$：MLE，中心。
+- $I(\theta_0)$：每筆 observation 的 Fisher information。
+- Variance 約 $1/n$；SD 約 $1/\sqrt n$。
+
+**為什麼？** 在 MLE 附近，log-likelihood Taylor expansion 的一階導數 $=0$，剩下負的 quadratic term，形狀就是 Normal kernel：
 
 $$
-I_n(\hat\theta)
-=-\frac{\partial^2\log L(x\mid\theta)}{\partial\theta^2}\bigg|_{\theta=\hat\theta}
-=-n\ell_n''(\hat\theta)
+\log L(x\mid\theta)\approx\log L(x\mid\hat\theta)
+-\tfrac12 I_n(\hat\theta)(\theta-\hat\theta)^2
 $$
 
-在 peak 附近，log-likelihood 向下彎，所以 $I_n(\hat\theta)>0$。乘回 $n$，上面的 Taylor 就變成：
+這裡 $I_n(\hat\theta)=-\partial^2\log L/\partial\theta^2|_{\hat\theta}$ 是整份資料的 observed information，且 $I_n\approx nI(\theta_0)$。
+
+**限制：** regular、identifiable、interior true parameter、適當 prior；不是所有模型都成立。
+
+## 3. Monte Carlo error
+
+對 **i.i.d.** posterior samples $\theta_1,\ldots,\theta_N$：
 
 $$
-n\ell_n(\theta)\approx n\ell_n(\hat\theta)
--\frac12 I_n(\hat\theta)(\theta-\hat\theta)^2
+\hat\mu=\frac1N\sum_{j=1}^N h(\theta_j),\qquad
+\boxed{\operatorname{MCSE}\approx s_h/\sqrt N}
 $$
 
-曲率 $I_n$ 越大，離開 peak 時 log-likelihood 掉得越快，posterior 就越窄。
+要把誤差約減半，$N$ 需變 **4 倍**。
 
----
+MCMC samples 有 autocorrelation；**不能直接把 i.i.d. 的 MCSE 公式照搬**，要考慮 long-run variance / ESS。
 
-### 3. 放回 posterior，就看到 normal kernel
+## 4. Importance sampling (IS)
 
-把 Taylor approximation 代回去。$\exp(n\ell_n(\hat\theta))$ 跟 $\theta$ 無關，可以收進 normalising constant：
+**問題：** target $p(z)$ 不好抽，但想求 $E_p[h(Z)]$。
 
-$$
-\pi(\theta\mid x)\approx C\,\pi(\theta)
-\exp\left[-\frac12 I_n(\hat\theta)(\theta-\hat\theta)^2\right]
-$$
-
-當 posterior 集中在很小的範圍，連續且正值的 prior 在這個範圍內變化很小，因而可用 $\pi(\hat\theta)$ 近似。把它也收進 constant：
+選容易抽的 proposal $g(z)$（要覆蓋 target 的 support），抽 $Z_j\overset{\mathrm{iid}}{\sim}g$，給每筆 weight：
 
 $$
-\pi(\theta\mid x)\approx C'
-\exp\left[-\frac12 I_n(\hat\theta)(\theta-\hat\theta)^2\right]
+w_j=\frac{p(Z_j)}{g(Z_j)}
 $$
 
-對照 normal density 的 kernel $\exp[-(\theta-\mu)^2/(2\sigma^2)]$，直接讀出：
+若 $p$ 已 normalised：
 
 $$
-\boxed{\theta\mid x\approx N\left(\hat\theta,\;I_n(\hat\theta)^{-1}\right)}
+\boxed{\hat\mu_{\rm IS}=\frac1N\sum_{j=1}^N h(Z_j)w_j}
 $$
 
-所以實際拿到資料後，可以算 MLE 和它附近的曲率，得到 posterior 的 normal approximation。
-
----
-
-### 4. 為什麼 variance 大約是 $1/n$？
-
-一筆 observation 的 expected Fisher information 是
+若 target 只知 $\tilde p(z)$（未知 normalising constant），改用 **self-normalised IS (SNIS)**：
 
 $$
-I(\theta_0)
-=-E_{\theta_0}\left[
-\frac{\partial^2\log f(X\mid\theta)}{\partial\theta^2}\bigg|_{\theta=\theta_0}
-\right]
+\tilde w_j=\frac{\tilde p(Z_j)}{g(Z_j)},\quad
+W_j=\frac{\tilde w_j}{\sum_k\tilde w_k},\quad
+\boxed{\hat\mu_{\rm SN}=\sum_j W_j h(Z_j)}
 $$
 
-整份資料的 log-likelihood 是 $n$ 項相加，曲率也會累加。在 regularity conditions 下，LLN 加上 MLE consistency 給出
+**記：普通 IS 前面有 $1/N$；SNIS 的 $W$ 已加總成 1，不再乘 $1/N$。**
 
-$$
-\frac{I_n(\hat\theta)}{n}\xrightarrow{P}I(\theta_0)
-\quad\Rightarrow\quad
-I_n(\hat\theta)^{-1}\approx\frac{1}{nI(\theta_0)}
-$$
+- Ordinary IS（適當條件）unbiased。
+- SNIS 一般 finite-sample biased，但 consistent。
+- 少數 weights 極大 → estimator 不穩；proposal 需要覆蓋 target 的重要區域與尾部。
 
-這就接回一開始的結果。$I_n$ 是從這份資料算出的 observed information，$nI(\theta_0)$ 是 expected information；兩者在大樣本下接近。
+## 5. IS 跟 RS 差在哪？
 
-**Example：** 若 $X_i\sim N(\theta,\sigma^2)$，$\sigma^2$ 已知，則 $\hat\theta=\bar x$、$I_n=n/\sigma^2$。搭配符合上述條件的 prior，大樣本下
+- **IS：** 不丟 proposal，給 weights，目的主要是 **算積分**。
+- **RS：** 不合格就丟掉重抽，accepted samples **真的來自 target**。
+- 因此原始 weighted IS samples **不能直接當 Gibbs 的 exact conditional draw**。
 
-$$
-\theta\mid x\approx N\left(\bar x,\;\frac{\sigma^2}{n}\right)
-$$
+## 考試要會
 
-資料量變成 4 倍，posterior standard deviation 約縮成一半。
-
-**$\hat\theta$ 和 $\theta_0$ 要分清楚：** 重抽一份資料，$\hat\theta$ 就會移動；posterior 描述的是給定目前資料後，$\theta$ 的不確定性。雖然 $\hat\theta\to\theta_0$，兩者的距離通常仍與 posterior 寬度同為 $1/\sqrt n$ 的量級，所以 normal approximation 要保留以 $\hat\theta$ 為中心。
-
----
-
-## Part 3 Monte Carlo error
-
-Recall Monte Carlo integration 就是把 integration 轉換成 expectation，再用 sample average 估計：
-
-$$
-\bar g=\frac1N\sum_{i=1}^N g(\theta^{(i)})\approx E_\pi[g(\theta)]
-$$
-
-假設 $\theta^{(i)}$ 是 i.i.d. posterior draws，且 $g(\theta)$ 有有限 variance。By CLT，大 $N$ 時：
-
-$$
-\bar g\approx N\left(E_\pi[g],\;\frac{s_g^2}{N}\right),\qquad s_g^2=\frac1{N-1}\sum_{i=1}^N\big(g(\theta^{(i)})-\bar g\big)^2
-$$
-
-- Monte Carlo standard error $=s_g/\sqrt N$，誤差以 $1/\sqrt N$ 的速度變小
-- 用 normal approximation 規劃誤差在 $\varepsilon$ 內、coverage 約 $1-\alpha$ 的 sample size（$s_g$ 可先由 pilot sample 估計）：
-
-$$
-z_{1-\alpha/2}\frac{s_g}{\sqrt N}\le\varepsilon\quad\Rightarrow\quad N\ge\left(\frac{z_{1-\alpha/2}\,s_g}{\varepsilon}\right)^2
-$$
-
-MCMC samples 有 autocorrelation，需要另外估計 long-run variance / effective sample size，不能直接套用 i.i.d. 的 $s_g/\sqrt N$。
-
----
-
-## Part 4 Importance sampling
-
-想估 $\mu=E_p[h(X)]$，但 target $p$ 不好抽時，改從容易抽的 proposal $q$ 抽樣，再給每筆 sample weight。$q(x)>0$ 需涵蓋 $p(x)>0$ 的區域。
-
-### 1. Target 已 normalised
-
-1. 抽 i.i.d. $X_i\sim q$。
-2. 算 weight $w_i=p(X_i)/q(X_i)$。
-3. 用 weighted average 估計：
-
-$$
-\mu=\int h(x)\frac{p(x)}{q(x)}q(x)\,dx,
-\qquad
-\hat\mu=\frac1N\sum_{i=1}^N h(X_i)w_i
-$$
-
-若 $E_p[|h(X)|]<\infty$，則 $E_q[\hat\mu]=\mu$，ordinary importance sampling 是 unbiased。
-
-### 2. Target 只知道 up to constant
-
-若 $p(x)=\tilde p(x)/Z$，但 $Z$ 不知道，先算 unnormalised weights：
-
-$$
-\tilde w_i=\frac{\tilde p(X_i)}{q(X_i)},
-\qquad
-W_i=\frac{\tilde w_i}{\sum_{j=1}^N\tilde w_j}
-$$
-
-Self-normalised estimator：
-
-$$
-\hat\mu_{\mathrm{SN}}
-=\sum_{i=1}^N W_i h(X_i)
-=\frac{\sum_i\tilde w_i h(X_i)}{\sum_i\tilde w_i}
-$$
-
-$W_i$ 已經加總為 1，外面不用再乘 $1/N$。這個 ratio estimator 一般有 finite-sample bias；在 support 與 integrability 條件成立時 consistent。
-
-### 3. Proposal 要怎麼選
-
-保留所有 samples，以 weights 調整貢獻。若少數 weights 特別大，estimate 會不穩。選擇涵蓋 target 重要區域、tail 不太輕的 $q$ 通常較安全，但仍需看 $h$ 與 weight 的 second moment。
-
-Ordinary IS 的 finite-variance 條件是
-
-$$
-E_q[(h(X)w(X))^2]
-=\int\frac{h(x)^2p(x)^2}{q(x)}\,dx<\infty
-$$
+Loss → mean / median / quantile / mode；大樣本 Normal approximation；MCSE 的 $1/\sqrt N$；IS / SNIS 公式與差別。

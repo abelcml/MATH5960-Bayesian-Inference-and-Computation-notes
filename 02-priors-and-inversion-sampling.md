@@ -1,71 +1,51 @@
-## Part 1 Topic of priors
+# Week 2 — Priors & inversion sampling
 
-### 1.1 Conjugate prior
+## 1. Conjugate prior
 
-Prior that makes the posterior distribution *stay in the same family as the prior*.
+**一句話：prior 與 posterior 留在同一個 distribution family，更新方便。**
 
-Ex.
+| Likelihood | Conjugate prior |
+| --- | --- |
+| Binomial 機率 | Beta |
+| Poisson rate | Gamma |
+| Normal mean（variance 已知） | Normal |
+| Gamma likelihood 的 rate（shape 已知） | Gamma |
 
-1. Binomial likelihood, choose $\text{Beta}(a,b)$ to be prior
-2. $\text{Gamma}(a,b)$ for Poisson
-3. Gamma prior for Gamma likelihood 的 rate parameter（shape 已知）
-4. Normal prior $N(b,d^2)$ for Normal mean（variance $\sigma^2$ 已知）
+Normal mean 的直覺：**posterior precision = prior precision + data precision**。
 
-當 likelihood 的 support 不依賴 $\theta$，且有以下 exponential-family form：
+若 likelihood 是 $f(x\mid\theta)=h(x)g(\theta)\exp[t(x)c(\theta)]$，可考慮同族先驗 $\pi(\theta)\propto g(\theta)^d e^{bc(\theta)}$（hyperparameters 要讓 prior proper）。
 
-$$
-f(x\mid\theta)=h(x)\,g(\theta)\exp\{t(x)\,c(\theta)\}
-$$
+## 2. Proper / improper
 
-可選 conjugate prior（hyperparameters 需讓 prior 可積分）：
+- **Proper**：prior 積分 = 1。
+- **Improper**：prior 無法積分成 1；仍可用，但 **posterior 必須 proper**。
+- 例：$\pi(\mu)\propto1$ 在 $\mu\in\mathbb R$ 上 improper；$U(0,1)$ proper。
 
-$$
-\pi(\theta)\propto g(\theta)^{d}\exp\{b\,c(\theta)\}
-$$
+## 3. Jeffreys prior
 
-For normal case, posterior precision = prior precision ($1/d^2$) + $n\times$ data precision ($1/\sigma^2$).
-
-### 1.2 Improper priors
-
-Prior 積分（或求和）是 $\infty$，無法 normalise。
-
-判斷方法：看 support（參數可能的取值範圍）
-
-- support 有界，例如 $p\in[0,1]$ → uniform prior 是 proper
-- support 無界，例如 $n\in\{0,1,2,\dots\}$、$\mu\in\mathbb R$ → uniform prior 是 improper
-
-Improper prior 可以用，但 posterior 必須是 proper。
-
-### 1.3 Jeffreys priors
-
-情景：假設你說你對身高 $h$ ignorant，so you set $p(h)\propto 1$。
-
-While if another person also says "ignorant", but he uses $z=h^2$, $p(z)\propto 1$, then $p(h)\propto 2h$.
-
-→ Bayesian 不能簡單說「不知道參數 ⇒ uniform prior」，要注意你說的是 uniform with respect to which parameterisation。
-
-Jeffreys prior:
+**問題：**「不知道」不代表可以隨便設 uniform；換參數後 uniform 不一定還是 uniform。
 
 $$
-\pi(\theta)\propto\sqrt{I(\theta)},\qquad I(\theta)=-E\left[\frac{\partial^2\log f(x\mid\theta)}{\partial\theta^2}\right]
+\boxed{\pi_J(\theta)\propto\sqrt{I(\theta)}}
 $$
 
-在 regularity conditions 下，上式用 expected Fisher information。Vector parameter 則用 $\pi(\boldsymbol\theta)\propto\sqrt{\det I(\boldsymbol\theta)}$。
+$I(\theta)=-E[\partial^2\log L(x\mid\theta)/\partial\theta^2]$ 是 Fisher information（用一筆或整份資料只差不依賴 $\theta$ 的常數）。多維用 $\sqrt{\det I(\theta)}$。
 
-Invariant under smooth one-to-one reparameterisation：換參數後依照 Jacobian 轉換，得到同一個 prior probability measure。Jeffreys prior 可能 proper，也可能 improper。
+**重點：** Jeffreys prior 對 smooth one-to-one reparameterisation 具 invariant 性質，仍可能 improper。
 
----
-## Part 2 Inversion sampling with MC method
+## 4. Inverse transform sampling
 
-若 $F$ continuous，則 $U=F(X)\sim U(0,1)$；下面先用 strictly increasing 的 $F$ 推導。
+**目的：** 將 uniform random number 變成目標分布的 sample。
 
 $$
-\Pr(U\le u)=\Pr(X\le F^{-1}(u))=F(F^{-1}(u))=u
+\boxed{U\sim U(0,1),\quad X=F^{-1}(U)\ \Rightarrow\ X\sim F}
 $$
 
-所以反過來：draw $u\sim U(0,1)$，set $x=F^{-1}(u)$，則 $x\sim F$。
+$F$ 是 target CDF。若 $F$ 非嚴格遞增，用 generalized inverse：$F^{-1}(u)=\inf\{x:F(x)\ge u\}$。
 
-Discrete distribution 也能 inverse sample，使用 generalized inverse $F^{-1}(u)=\inf\{x:F(x)\ge u\}$。但 discrete $X$ 的 $F(X)$ 通常不會是 uniform。
+- **好處**：uniforms 獨立 → samples 獨立。
+- **困難**：要能算出 inverse CDF；實務上主要用於 univariate。
 
-- 優點：用 independent uniforms 可產生 independent samples
-- 缺點：需要 $F^{-1}$ 算得出來；基本上只適用 univariate
+## 考試要會
+
+分辨 conjugate / improper / Jeffreys，以及寫出 $U\to F^{-1}(U)$ 的 inversion algorithm。

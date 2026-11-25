@@ -1,33 +1,41 @@
-## 1. Bayesian hypothesis testing
+# Week 8 — Bayes factors（原 repo 已整理部分）
 
-兩個 hypotheses，資料比較支持哪一個？
+## 1. 我們在比較什麼？
 
-![[Pasted image 20261115232714.png]]
+**Parameter inference：** 固定模型，推未知 $\theta$。
 
----
+**Model comparison：** 比較模型 $M_0$、$M_1$，問資料讓哪個模型的支持度增加。
 
-## 2. Bayesian model comparison
+## 2. Marginal likelihood
 
----
-
-## 3. Bayes factor
-
-Want to compare models given $x$。令 $\pi(i)$ 為 model $M_i$ 的 prior probability，$m_i(x)=p(x\mid M_i)$ 為 marginal likelihood：
+每個模型先把自己的 parameters 積分掉：
 
 $$
-m_i(x)=\int p(x\mid\theta_i,M_i)\pi(\theta_i\mid M_i)\,d\theta_i
+\boxed{m_i(x)=p(x\mid M_i)=\int L(x\mid\theta_i,M_i)\pi(\theta_i\mid M_i)\,d\theta_i}
 $$
 
-Bayes' theorem 給 $\pi(i\mid x)=m_i(x)\pi(i)/m(x)$，因此
+**意思：** 模型 $M_i$ 在考慮整個 prior parameter uncertainty 後，對這份資料的 predictive density。
+
+## 3. Bayes factor = 兩個 marginal likelihood 相比
 
 $$
-\frac{\pi(i\mid x)}{\pi(j\mid x)}
-=\frac{m_i(x)\pi(i)/m(x)}{m_j(x)\pi(j)/m(x)}
-=\frac{\pi(i)}{\pi(j)}B_{ij},
-\qquad
-B_{ij}=\frac{m_i(x)}{m_j(x)}
+\boxed{B_{01}=\frac{m_0(x)}{m_1(x)}}
 $$
 
-Posterior odds = prior odds × Bayes factor。$B_{ij}>1$ 表示資料讓 odds 朝 $M_i$ 的方向增加；最後 posterior odds 還取決於 prior odds。
+$$
+\boxed{\frac{\Pr(M_0\mid x)}{\Pr(M_1\mid x)}
+=B_{01}\,\frac{\Pr(M_0)}{\Pr(M_1)}}
+$$
 
-一般的 marginal likelihood 比較需要 proper parameter priors，否則 improper prior 的任意常數會使 Bayes factor 無法唯一決定。
+**背法：posterior odds = Bayes factor × prior odds。**
+
+- $B_{01}>1$：資料把 odds 推向 $M_0$，**不表示** $\Pr(M_0\mid x)=B_{01}$。
+- 通常需要 **proper parameter priors**，因為 improper prior 的任意比例常數會污染 marginal likelihood。
+
+## 本 repo 尚未整理
+
+原版的「Bayesian hypothesis testing」圖片連結缺少實際圖片檔；「Bayesian model comparison」仍是空章。本次不憑空補上其證明或例題。
+
+## 考試要會
+
+定義 $m_i(x)$、$B_{01}$，以及 posterior odds 與 prior odds 的關係。

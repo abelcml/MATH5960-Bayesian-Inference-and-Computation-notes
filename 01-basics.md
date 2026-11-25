@@ -1,69 +1,48 @@
-## 1. Usual distributions
+# Week 1 — Bayesian basics
 
-只看跟參數有關的 kernel，constant 可以先忽略。Gamma 用 shape–rate，Inverse-Gamma 用 $v^{-(a+1)}e^{-b/v}$ 的 convention。
+## 1. 一句話
 
-| Kernel（對參數而言） | Distribution / support |
+**資料用 likelihood，信念用 prior，更新後得到 posterior；最後用 posterior 做 inference / prediction。**
+
+$$
+\boxed{\pi(\theta\mid x)\propto L(x\mid\theta)\pi(\theta)}
+$$
+
+完整式：$\pi(\theta\mid x)=L(x\mid\theta)\pi(\theta)/\int L(x\mid u)\pi(u)\,du$。
+
+## 2. 常用 distribution：看 kernel 認分布
+
+| Kernel（忽略與參數無關的常數） | 分布 |
 | --- | --- |
-| $\exp\left(-(\theta-m)^2/(2v)\right)$ | $N(m,v)$，$\theta\in\mathbb R$、$v>0$ |
-| $\theta^{a-1}e^{-b\theta}$ | $\operatorname{Gamma}(a,b)$，$\theta>0$ |
-| $(\sigma^2)^{-(a+1)}e^{-b/\sigma^2}$ | $\operatorname{InvGamma}(a,b)$，$\sigma^2>0$ |
-| $\theta^{a-1}(1-\theta)^{b-1}$ | $\operatorname{Beta}(a,b)$，$0<\theta<1$ |
-| $(1+t^2/\nu)^{-(\nu+1)/2}$ | $t_\nu$，$t\in\mathbb R$ |
+| $e^{-(\theta-m)^2/(2v)}$ | $N(m,v)$ |
+| $\theta^{a-1}e^{-b\theta}$，$\theta>0$ | $\operatorname{Gamma}(a,b)$ |
+| $v^{-a-1}e^{-b/v}$，$v>0$ | $\operatorname{InvGamma}(a,b)$ |
+| $\theta^{a-1}(1-\theta)^{b-1}$，$0<\theta<1$ | $\operatorname{Beta}(a,b)$ |
+| $(1+t^2/\nu)^{-(\nu+1)/2}$ | Student $t_\nu$ |
 
-其中 $a,b,\nu>0$。
+約定：Normal 寫 **mean, variance**；Gamma 寫 **shape, rate**。
 
----
+## 3. Credible interval
 
-## 2. Bayesian updating
+想找 posterior 裡包含 $\theta$ 的 95% 機率區間。
 
-1. Specify likelihood $L(x\mid\theta)$。
-2. Choose prior $\pi(\theta)$。
-3. 用 Bayes' theorem 算 posterior：
-   $$
-   \pi(\theta\mid x)
-   =\frac{L(x\mid\theta)\pi(\theta)}
-   {\int L(x\mid u)\pi(u)\,du}
-   $$
-4. 從 posterior 做 inference 或選 decision。
-
-### Posterior predictive sampling
-
-想預測新觀測 $y$，把 parameter uncertainty 積分掉。假設給定 $\theta$ 後，$y$ 與現有資料 $x$ independent：
+- **Equal-tailed**：直接取 posterior 2.5% 和 97.5% quantiles。
+- **HPD / HDR**：優先收進 posterior density 較高的位置；multimodal 時可能不連續。
 
 $$
-p(y\mid x)=\int f(y\mid\theta)\pi(\theta\mid x)\,d\theta
+\Pr(a\le\theta\le b\mid x)=0.95
 $$
 
-已經有 posterior samples 時，可以直接做：
+這是 **給定資料後，參數的 posterior probability**，不是 frequentist confidence interval 的解釋。
 
-1. 抽 $\theta^{(i)}\sim\pi(\theta\mid x)$。
-2. 再抽 $y^{(i)}\sim f(y\mid\theta^{(i)})$。
-3. 保留 $y^{(i)}$，就是 posterior predictive samples。
-
-每一對 $(\theta^{(i)},y^{(i)})$ 的 joint density 是 $\pi(\theta\mid x)f(y\mid\theta)$。忽略 $\theta^{(i)}$，就對應到公式中的 integrate out。
-
----
-
-## 3. Credible intervals
-
-95% credible interval $[a,b]$ 滿足 $\Pr(a\le\theta\le b\mid x)=0.95$。對 continuous posterior，equal-tailed interval 讓兩端各留 2.5%：
+## 4. Posterior predictive（預測新資料 $y$）
 
 $$
-\int_{-\infty}^{a}\pi(\theta\mid x)\,d\theta=0.025,
-\qquad
-\int_{-\infty}^{b}\pi(\theta\mid x)\,d\theta=0.975
+\boxed{p(y\mid x)=\int f(y\mid\theta)\pi(\theta\mid x)\,d\theta}
 $$
 
-積分只需涵蓋 parameter 的 support，例如 $\theta>0$ 時下限可用 $0$。
+如果已經有 posterior samples：先抽 $\theta$，再抽 $y\mid\theta$。**先抽參數，再抽新資料**，即把 parameter uncertainty 一起帶入預測。
 
-Highest density region（HDR / HPD region）收集 posterior density 最高的地方：
+## 考試要會
 
-$$
-C_c=\{\theta:\pi(\theta\mid x)\ge c\},
-\qquad
-\int_{C_c}\pi(\theta\mid x)\,d\theta=0.95
-$$
-
-在通常的 continuous density 情況下，這給出最小長度／體積的 credible region。Unimodal posterior 常得到一個 interval；multimodal posterior 的 HDR 可以分成幾段。
-
-不感興趣的 nuisance parameters 可以先 integrate out，再對 marginal posterior 找 credible interval。
+寫出 Bayes formula、從 kernel 認出 distribution、解釋 credible interval、寫 posterior predictive 的兩段抽樣。
