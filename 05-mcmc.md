@@ -1,6 +1,6 @@
-# Week 5 — Markov chains, Gibbs & convergence
+## Part 1 Markov chains / MCMC
 
-## 1. 為什麼需要 MCMC？
+### 5. Page 17: Why MCMC
 
 **我們真正要做 Bayesian inference**：算 $E_{\pi(\theta\mid x)}[h(\theta)]$。但 posterior 太難直接抽，所以設計一條 **stationary distribution = posterior** 的 Markov chain，拿它的長期 samples 算平均。
 
@@ -10,7 +10,7 @@ $$
 
 MCMC samples 通常相依，**不是 i.i.d.**。
 
-## 2. Markov chain notation（跟 Week 7 一樣）
+### 1. Definition
 
 - $\theta_t$：現在 state；$\theta_{t+1}$：下一個 state。
 - **Markov property**：下一步只需要知道現在，不需知道更早歷史。
@@ -24,7 +24,7 @@ $$
 P^2(a,b)=\sum_c P(a,c)P(c,b)
 $$
 
-## 3. 什麼條件讓 chain 靠得住？
+### 3. Irreducibility and aperiodicity
 
 | 名稱 | 人話 |
 | --- | --- |
@@ -41,7 +41,11 @@ $$
 
 $d(a)=1$ → aperiodic。**注意：** time-average convergence 本身通常不需要 aperiodicity；分布收斂到 stationary 則還需相關條件。連續 state 需要相應的 Harris 類條件。
 
-## 4. Gibbs sampler：只換一個參數
+---
+
+## Part 2 Gibbs sampling
+
+### 1. Update full conditionals
 
 假設 $\theta_t=(a_t,b_t)$，目標是 joint posterior $\pi(a,b\mid x)$。
 
@@ -55,7 +59,7 @@ $d(a)=1$ → aperiodic。**注意：** time-average convergence 本身通常不�
 
 **為何用 Gibbs？** Joint posterior 難直接抽，但每個 full conditional 可能很好抽。每一步要 **exact conditional sampling**。
 
-### Normal example（記更新順序，別先背細節）
+### 2. Example P25: Normal model
 
 若 $x_i\mid\mu,v\sim N(\mu,v)$，prior 獨立為 $\mu\sim N(\xi,\kappa^{-1})$ 和 $1/v\sim\operatorname{Gamma}(\alpha,\beta)$：
 
@@ -73,7 +77,7 @@ $$
 
 先用目前 $v$ 抽 $\mu$，再用新的 $\mu$ 抽 $1/v$。
 
-## 5. Gibbs 的問題
+### 3. P27–31: Failure of Gibbs
 
 - **無法從 full conditional 直接抽** → Week 7 的 M-H。
 - **Parameters 高度相關** → coordinate-wise moves 很小，mixing 慢、autocorrelation 高。
@@ -81,7 +85,9 @@ $$
 
 改善：**blocking**（高度相關的參數一起抽）；**reparameterisation**（換座標讓 dependency 變小）。
 
-## 6. 如何判斷 MCMC 有沒有跑好？
+---
+
+## Part 3 Assessing convergence
 
 | 方法 | 目的 |
 | --- | --- |
