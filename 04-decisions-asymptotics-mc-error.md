@@ -1,6 +1,4 @@
-# Week 4 — Decisions, asymptotics, MC error & IS
-
-## 1. Bayesian decision：用 posterior 選行動
+## Part 1 Loss functions / Bayesian decisions
 
 **原則：選 decision $d$，讓 posterior expected loss 最小。**
 
@@ -17,7 +15,9 @@ $$
 
 Continuous $\theta$ 的 exact 0–1 loss 不適合直接用來推 mode；這個結果限定離散狀況。
 
-## 2. Posterior asymptotics
+---
+
+## Part 2 Posterior asymptotics
 
 **一句話：資料多時，在 regularity conditions 下 posterior 接近 Normal，且越來越窄。**
 
@@ -40,7 +40,9 @@ $$
 
 **限制：** regular、identifiable、interior true parameter、適當 prior；不是所有模型都成立。
 
-## 3. Monte Carlo error
+---
+
+## Part 3 Monte Carlo error
 
 對 **i.i.d.** posterior samples $\theta_1,\ldots,\theta_N$：
 
@@ -53,7 +55,9 @@ $$
 
 MCMC samples 有 autocorrelation；**不能直接把 i.i.d. 的 MCSE 公式照搬**，要考慮 long-run variance / ESS。
 
-## 4. Importance sampling (IS)
+---
+
+## Part 4 Importance sampling
 
 **問題：** target $p(z)$ 不好抽，但想求 $E_p[h(Z)]$。
 
@@ -83,12 +87,12 @@ $$
 - SNIS 一般 finite-sample biased，但 consistent。
 - 少數 weights 極大 → estimator 不穩；proposal 需要覆蓋 target 的重要區域與尾部。
 
-## 5. IS 跟 RS 差在哪？
+### IS 跟 RS 差在哪？
 
 - **IS：** 不丟 proposal，給 weights，目的主要是 **算積分**。
 - **RS：** 不合格就丟掉重抽，accepted samples **真的來自 target**。
 - 因此原始 weighted IS samples **不能直接當 Gibbs 的 exact conditional draw**。
 
-## 考試要會
+**考試要會**
 
 Loss → mean / median / quantile / mode；大樣本 Normal approximation；MCSE 的 $1/\sqrt N$；IS / SNIS 公式與差別。
