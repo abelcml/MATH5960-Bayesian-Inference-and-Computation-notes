@@ -19,15 +19,13 @@ Continuous $\theta$ 的 exact 0–1 loss 不適合直接用來推 mode；這個�
 
 ## Part 2 Posterior asymptotics
 
+### 1. 樣本變多，posterior 會怎樣？
+
 **一句話：資料多時，在 regularity conditions 下 posterior 接近 Normal，且越來越窄。**
 
-$$
-\boxed{\theta\mid x\approx N\left(\hat\theta,\frac1{nI(\theta_0)}\right)}
-$$
+---
 
-- $\hat\theta$：MLE，中心。
-- $I(\theta_0)$：每筆 observation 的 Fisher information。
-- Variance 約 $1/n$；SD 約 $1/\sqrt n$。
+### 2. 從 posterior 開始，在 MLE 附近做 Taylor
 
 **為什麼？** 在 MLE 附近，log-likelihood Taylor expansion 的一階導數 $=0$，剩下負的 quadratic term，形狀就是 Normal kernel：
 
@@ -36,7 +34,24 @@ $$
 -\tfrac12 I_n(\hat\theta)(\theta-\hat\theta)^2
 $$
 
+---
+
+### 3. 放回 posterior，就看到 normal kernel
+
+$$
+\boxed{\theta\mid x\approx N\left(\hat\theta,\frac1{nI(\theta_0)}\right)}
+$$
+
+- $\hat\theta$：MLE，中心。
+- $I(\theta_0)$：每筆 observation 的 Fisher information。
+
+---
+
+### 4. 為什麼 variance 大約是 $1/n$？
+
 這裡 $I_n(\hat\theta)=-\partial^2\log L/\partial\theta^2|_{\hat\theta}$ 是整份資料的 observed information，且 $I_n\approx nI(\theta_0)$。
+
+- Variance 約 $1/n$；SD 約 $1/\sqrt n$。
 
 **限制：** regular、identifiable、interior true parameter、適當 prior；不是所有模型都成立。
 
