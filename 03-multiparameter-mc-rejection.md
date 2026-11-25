@@ -1,6 +1,6 @@
-# Week 3 — Multiparameter inference, MC & rejection sampling
+## Part 1 Mixture priors, prior predictive checking
 
-## 1. Mixture prior / prior predictive
+### 1.1 Mixture priors
 
 **Mixture prior：** 把不同先驗意見混合。
 
@@ -8,13 +8,17 @@ $$
 \pi(\theta)=w_1\pi_1(\theta)+w_2\pi_2(\theta),\quad w_1+w_2=1
 $$
 
+### 1.2 Prior predictive checking
+
 **Prior predictive check：** 先抽 $\theta\sim\pi$，再抽 $x\sim f(x\mid\theta)$，看模擬資料是否合理。
 
 $$
 p(x)=\int f(x\mid\theta)\pi(\theta)\,d\theta
 $$
 
-## 2. 多參數 posterior：joint、marginal、conditional
+---
+
+## Part 2 Multi-parameter Bayesian inference
 
 $\theta=(\theta_1,\theta_2)$ 時，posterior 是 **joint distribution**；不要把兩個參數當作自動獨立。
 
@@ -25,7 +29,7 @@ $$
 
 因此如果右邊兩個分布都好抽：**先抽 $\theta_2\mid x$，再抽 $\theta_1\mid\theta_2,x$**，就得到 joint sample。這叫 sequential sampling，不是 Gibbs。
 
-### Normal model 必記例子
+### 2.3 步驟（以 Normal 為例）
 
 令 $x_i\mid\mu,v\sim N(\mu,v)$，$v=\sigma^2$，且選 $\pi(\mu,v)\propto1/v$（**此處是 independent/reference prior，不是 full Jeffreys**）。定義 $s^2=\sum(x_i-\bar x)^2/(n-1)$，假設 $n\ge2$、$s^2>0$。
 
@@ -49,7 +53,9 @@ $$
 
 Proper conjugate alternative：$v\sim\operatorname{InvGamma}(a,b)$、$\mu\mid v\sim N(m,v/\kappa)$。多維 covariance 可用 inverse-Wishart。
 
-## 3. Monte Carlo integration
+---
+
+## Part 3 Monte Carlo integration
 
 **不想硬算積分，改成抽樣後取平均。**
 
@@ -65,7 +71,9 @@ $$
 
 **最大問題：** Monte Carlo 需要 target samples，但 target 常常很難直接抽。
 
-## 4. Rejection sampling (RS)
+---
+
+## Part 4 Now how to get samples → Rejection sampling
 
 **目的：** target $f$ 難抽，但容易從 $g$ 抽，而且能找到 envelope $f(z)\le K g(z)$。
 
@@ -84,12 +92,12 @@ $$
 
 **效率：** 設 $Z=\int f(z)dz$，則 acceptance rate $=Z/K$。$K$ 大 → 拒絕多 → 貴。
 
-## 5. RS vs MC
+### 4.6 Relation to Monte Carlo integration
 
 - **RS 負責生出真正來自 target 的 samples**。
 - **MC 負責拿 samples 算 expectations**。
 - 能直接抽 target 時，不必特地做 RS。
 
-## 考試要會
+**考試要會**
 
 分清 joint / marginal / conditional；Normal model 的三個 posterior 結果；MC sample mean；RS 的 envelope、acceptance rule 與 $Z/K$。
