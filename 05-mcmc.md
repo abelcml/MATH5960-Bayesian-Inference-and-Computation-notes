@@ -1,15 +1,5 @@
 ## Part 1 Markov chains / MCMC
 
-### 5. Page 17: Why MCMC
-
-**我們真正要做 Bayesian inference**：算 $E_{\pi(\theta\mid x)}[h(\theta)]$。但 posterior 太難直接抽，所以設計一條 **stationary distribution = posterior** 的 Markov chain，拿它的長期 samples 算平均。
-
-$$
-\boxed{\frac1N\sum_{t=1}^N h(\theta_t)\longrightarrow E_\pi[h(\theta)]}
-$$
-
-MCMC samples 通常相依，**不是 i.i.d.**。
-
 ### 1. Definition
 
 - $\theta_t$：現在 state；$\theta_{t+1}$：下一個 state。
@@ -40,6 +30,16 @@ d(a)=\gcd\{k\ge1:P^k(a,a)>0\}
 $$
 
 $d(a)=1$ → aperiodic。**注意：** time-average convergence 本身通常不需要 aperiodicity；分布收斂到 stationary 則還需相關條件。連續 state 需要相應的 Harris 類條件。
+
+### 5. Page 17: Why MCMC
+
+**我們真正要做 Bayesian inference**：算 $E_{\pi(\theta\mid x)}[h(\theta)]$。但 posterior 太難直接抽，所以設計一條 **stationary distribution = posterior** 的 Markov chain，拿它的長期 samples 算平均。
+
+$$
+\boxed{\frac1N\sum_{t=1}^N h(\theta_t)\longrightarrow E_\pi[h(\theta)]}
+$$
+
+MCMC samples 通常相依，**不是 i.i.d.**。
 
 ---
 
